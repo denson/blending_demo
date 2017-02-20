@@ -153,11 +153,37 @@ BSD license, 3 clauses.
 """
 
 
+from __future__ import division
+
+
+import sklearn
+
 import numpy as np
+
+sklearn_version = sklearn.__version__
+print('The scikit-learn version is {}.'.format(sklearn.__version__))
+
+sklearn_version = sklearn_version.split('.')
+main_sklearn_verison = int(sklearn_version[1])
+
+current_scikit_verison_flag = True
+
+if main_sklearn_verison < 18:
+    print('Your version of scikit learn is less than version 18.')
+    print('Denson will stop supporting versions less than 18 in March 2017.')
+    current_scikit_verison_flag = False
+
+
+
+
 
 import pandas as pd
 
-from sklearn.model_selection import StratifiedKFold,StratifiedShuffleSplit
+if current_scikit_verison_flag:
+    from sklearn.model_selection import StratifiedKFold,StratifiedShuffleSplit
+else:
+    from sklearn.cross_validation import StratifiedKFold, StratifiedShuffleSplit
+    
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -169,7 +195,7 @@ from sklearn.datasets import  make_classification
 
 
 def logloss(attempt, actual, epsilon=1.0e-15):
-    """Logloss, i.e. the score of the bioresponse competition.
+    """Logloss
     """
     attempt = np.clip(attempt, epsilon, 1.0-epsilon)
     return - np.mean(actual * np.log(attempt) +
@@ -259,19 +285,29 @@ if __name__ == '__main__':
     
     
     # Use SSS to create training and test sets
-    sss = StratifiedShuffleSplit(n_splits=1,
-                                 test_size=0.2,
-                                 random_state=42)
     
-
-
-    for train_index,test_index in sss.split(X_gen,y_gen):
-        X_train = X_gen[train_index] 
-        y_train = y_gen[train_index]
+    if current_scikit_verison_flag:
+        sss = StratifiedShuffleSplit(n_splits=1,
+                                     test_size=0.2,
+                                     random_state=42)
         
-        X_test = X_gen[test_index]
-        y_test = y_gen[test_index]
+        for train_index,test_index in sss.split(X_gen,y_gen):
+            X_train = X_gen[train_index] 
+            y_train = y_gen[train_index]
     
+            X_test = X_gen[test_index]
+            y_test = y_gen[test_index]
+    
+    else:
+        sss = StratifiedShuffleSplit(y_gen, 1, test_size=0.2, random_state=42)
+    
+        for train_index,test_index in sss:
+            X_train = X_gen[train_index] 
+            y_train = y_gen[train_index]
+    
+            X_test = X_gen[test_index]
+            y_test = y_gen[test_index]
+        
 
     
 
@@ -298,13 +334,22 @@ if __name__ == '__main__':
     dataset_blend_train = np.zeros((X_train.shape[0], len(clfs)))
     dataset_blend_test = np.zeros((X_holdout.shape[0], len(clfs)))
     
-    # For each fold train on 80% and test on 20%. If you have a bunch of data
-    # you might want to make it a 50/50 split.
-    sss = StratifiedShuffleSplit(n_splits=n_folds,
-                                 test_size = 0.2)
-
-    # We will resuse the same train-test splits for each of the models.
-    splits = list(sss.split(X_train,y_train))
+    # Use SSS to create training and test sets
+    
+    if current_scikit_verison_flag:
+        # For each fold train on 80% and test on 20%. If you have a bunch of data
+        # you might want to make it a 50/50 split.
+        sss = StratifiedShuffleSplit(n_splits=n_folds,
+                                     test_size = 0.2)
+    
+    
+        # We will resuse the same train-test splits for each of the models.
+        splits = list(sss.split(X_train,y_train))
+    
+    else:
+        sss = StratifiedShuffleSplit(y_train, n_folds, test_size=0.2)
+        
+        splits = list(sss)
     
     for jdx, clf in enumerate(clfs):
         print jdx, clf
