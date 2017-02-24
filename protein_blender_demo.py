@@ -274,7 +274,7 @@ if __name__ == '__main__':
     flip_y = float(mislabel)/100.0
     # Generate the problem
     X_gen, y_gen = make_classification(n_samples=sample_size , 
-                               n_features=n_informative, 
+                               n_features=n_features , 
                                n_redundant=0, 
                                n_informative=n_informative,
                                random_state=42, 
