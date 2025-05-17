@@ -153,9 +153,6 @@ BSD license, 3 clauses.
 """
 
 
-from __future__ import division
-
-
 import sklearn
 
 import numpy as np
@@ -328,7 +325,7 @@ if __name__ == '__main__':
             ExtraTreesClassifier(n_estimators=100, n_jobs=-1, criterion='entropy'),
             GradientBoostingClassifier(learning_rate=0.05, subsample=0.5, max_depth=6, n_estimators=50)]
 
-    print "Creating train and test sets for blending."
+    print("Creating train and test sets for blending.")
     
     # These arrays will hold the blended predictions
     dataset_blend_train = np.zeros((X_train.shape[0], len(clfs)))
@@ -352,12 +349,12 @@ if __name__ == '__main__':
         splits = list(sss)
     
     for jdx, clf in enumerate(clfs):
-        print jdx, clf
+        print(jdx, clf)
         
         # dataset__blend_test_j is for this fold of this model (RDF-gini, fold 1 etc)
         dataset_blend_test_j = np.zeros((X_holdout.shape[0], len(splits)))
         for idx, (train, test) in enumerate(splits):
-            print "Fold", idx
+            print("Fold", idx)
             
             # Split the training data into train-test sets for this fold
             X_fold_train = X_train[train]
@@ -399,8 +396,8 @@ if __name__ == '__main__':
     Now we train a logistic regression (or some other simple model) on the transformed
     training data and use it to predict the transformed test data.
     '''
-    print
-    print "Blending."
+    print()
+    print("Blending.")
     clf = LogisticRegression()
     clf.fit(dataset_blend_train, y_train)
     y_holdout = clf.predict_proba(dataset_blend_test)[:, 1]
@@ -410,7 +407,7 @@ if __name__ == '__main__':
     transformed data will be skewed towards 0 or 1. This will stretch the predictions
     back to a range of 0-1
     '''
-    print "Linear stretch of predictions to [0,1]"
+    print("Linear stretch of predictions to [0,1]")
     y_holdout = (y_holdout - y_holdout.min()) / (y_holdout.max() - y_holdout.min())
     
     y_pred = np.zeros(len(y_holdout))
