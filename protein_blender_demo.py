@@ -446,7 +446,7 @@ if __name__ == '__main__':
     print('Single RDF MCC = %.4f' % MCC)
     
     llog_loss = logloss(y_proba, y_holdout_true, epsilon=1.0e-15)
-    print('Single RDF logloss = %.4f' % log_loss) 
+    print('Single RDF logloss = %.4f' % llog_loss)
     
     
     clf = ExtraTreesClassifier(n_estimators=100, n_jobs=-1, criterion='gini')
